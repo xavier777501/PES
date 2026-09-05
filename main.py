@@ -78,20 +78,20 @@ async def health():
 
 @app.post("/api/generate-face")
 async def generate_face(
-    image: UploadFile = File(..., description="Photo du visage (JPG/PNG)"),
+    file: UploadFile = File(..., description="Photo du visage (JPG/PNG)"),
     template_id: int = 0
 ):
     """
     Génère une texture UV PES depuis une photo.
     
-    - **image**: Photo du visage (JPG ou PNG)
+    - **file**: Photo du visage (JPG ou PNG)
     - **template_id**: Index du template à utiliser (0-8, défaut: auto)
     
     Retourne: JSON avec image base64 + métadonnées
     """
     
     # Validation du fichier
-    if not image.content_type.startswith("image/"):
+    if not file.content_type.startswith("image/"):
         raise HTTPException(400, "Le fichier doit être une image")
     
     # Créer un nom de fichier unique
@@ -106,7 +106,7 @@ async def generate_face(
     try:
         # Sauvegarder le fichier uploadé
         with input_path.open("wb") as f:
-            shutil.copyfileobj(image.file, f)
+            shutil.copyfileobj(file.file, f)
         
         # Vérifier que c'est une image valide
         img = cv2.imread(str(input_path))

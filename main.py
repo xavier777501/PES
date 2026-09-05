@@ -80,6 +80,69 @@ async def health():
     }
 
 
+@app.get("/api/diagnostic")
+async def diagnostic():
+    """
+    Endpoint de diagnostic pour vérifier les dépendances système
+    """
+    import subprocess
+    import sys
+    
+    diagnostics = {
+        "python_version": sys.version,
+        "opencv_version": None,
+        "mediapipe_version": None,
+        "numpy_version": None,
+        "system_libs": {},
+        "errors": []
+    }
+    
+    # Vérifier OpenCV
+    try:
+        import cv2
+        diagnostics["opencv_version"] = cv2.__version__
+    except Exception as e:
+        diagnostics["errors"].append(f"OpenCV import error: {str(e)}")
+    
+    # Vérifier MediaPipe
+    try:
+        import mediapipe as mp
+        diagnostics["mediapipe_version"] = mp.__version__
+    except Exception as e:
+        diagnostics["errors"].append(f"MediaPipe import error: {str(e)}")
+    
+    # Vérifier NumPy
+    try:
+        diagnostics["numpy_version"] = np.__version__
+    except Exception as e:
+        diagnostics["errors"].append(f"NumPy error: {str(e)}")
+    
+    # Chercher les bibliothèques système (libGLESv2)
+    libs_to_check = [
+        "libGLESv2.so.2",
+        "libGL.so.1",
+        "libglib-2.0.so.0",
+        "libgomp.so.1"
+    ]
+    
+    for lib in libs_to_check:
+        try:
+            result = subprocess.run(
+                ["find", "/usr", "-name", f"*{lib}*"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if result.stdout.strip():
+                diagnostics["system_libs"][lib] = "FOUND: " + result.stdout.strip().split('\n')[0]
+            else:
+                diagnostics["system_libs"][lib] = "NOT FOUND"
+        except Exception as e:
+            diagnostics["system_libs"][lib] = f"ERROR: {str(e)}"
+    
+    return diagnostics
+
+
 @app.post("/api/generate-face")
 async def generate_face(
     file: UploadFile = File(..., description="Photo du visage (JPG/PNG)"),

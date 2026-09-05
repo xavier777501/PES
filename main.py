@@ -157,9 +157,21 @@ async def generate_face(
     Retourne: JSON avec image base64 + métadonnées
     """
     
-    # Validation du fichier
-    if not file.content_type.startswith("image/"):
-        raise HTTPException(400, "Le fichier doit être une image")
+    try:
+        # Validation du fichier
+        if not file.content_type.startswith("image/"):
+            raise HTTPException(400, "Le fichier doit être une image")
+    except Exception as e:
+        print(f"❌ Error validating file: {e}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "error_message": f"File validation error: {str(e)}"
+            }
+        )
     
     # Créer un nom de fichier unique
     import uuid
@@ -171,25 +183,35 @@ async def generate_face(
     output_path = TEMP_DIR / f"{unique_id}_output.png"
     
     try:
+        print(f"📥 Receiving file: {file.filename}, content_type: {file.content_type}")
+        
         # Sauvegarder le fichier uploadé
         with input_path.open("wb") as f:
             shutil.copyfileobj(file.file, f)
+        
+        print(f"💾 File saved to: {input_path}")
         
         # Vérifier que c'est une image valide
         img = cv2.imread(str(input_path))
         if img is None:
             raise HTTPException(400, "Image invalide ou corrompue")
         
+        print(f"✅ Image loaded successfully: {img.shape}")
+        
         source_height, source_width = img.shape[:2]
         
         # Appeler le générateur (TON CODE PYTHON EXACT)
         templates = TEMPLATES if TEMPLATES else [str(input_path)]
+        
+        print(f"🎨 Calling face generator with {len(templates)} templates...")
         
         result = generate_pes_face(
             str(input_path),
             templates,
             str(output_path)
         )
+        
+        print(f"📊 Generation result: {result}")
         
         if not result or not isinstance(result, tuple):
             raise HTTPException(500, "Erreur lors de la génération")
@@ -198,16 +220,19 @@ async def generate_face(
         
         if not success:
             # Mode fallback : pas de visage détecté
-            # TODO: Implémenter le fallback mode si nécessaire
             raise HTTPException(
                 400, 
                 "Aucun visage détecté. Essayez avec une photo plus claire ou frontale."
             )
         
+        print(f"✅ Face generated successfully: {generated_path}")
+        
         # Lire l'image générée et la convertir en base64
         with open(generated_path, "rb") as f:
             image_bytes = f.read()
             image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+        
+        print(f"📤 Sending response with {len(image_base64)} bytes base64")
         
         # Retourner JSON avec l'image en base64
         return JSONResponse({

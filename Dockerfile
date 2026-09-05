@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libglx0 \
     libgl1 \
     libegl1 \
-    libgles2 \
+    libgles2-mesa \
+    libgles2-mesa-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Créer le dossier de travail

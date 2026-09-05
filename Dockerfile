@@ -1,7 +1,7 @@
 # Dockerfile pour déployer le backend Python sur Render avec OpenCV headless
 FROM python:3.11-slim
 
-# Installer les dépendances système pour OpenCV headless
+# Installer TOUTES les dépendances système pour OpenCV + MediaPipe
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1-mesa-glx \
     libglib2.0-0 \
@@ -10,6 +10,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxext6 \
     libgomp1 \
     libgthread-2.0-0 \
+    libglx0 \
+    libgl1 \
+    libegl1 \
+    libgles2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Créer le dossier de travail

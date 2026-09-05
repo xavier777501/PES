@@ -9,3 +9,5 @@ services:
     envVars:
       - key: PORT
         value: 10000
+    # Déploiement manuel avec image Docker Hub
+    # dockerHub: xavier777501/pes-backend:latest

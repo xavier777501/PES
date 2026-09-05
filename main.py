@@ -2,12 +2,16 @@
 PES Face UV Generator - FastAPI Backend
 Utilise le code Python exact qui marche déjà (main.py)
 """
+# IMPORTANT: Force OpenCV en mode headless AVANT tout import
+import os
+os.environ['OPENCV_IO_ENABLE_OPENEXR'] = '0'
+os.environ['OPENCV_VIDEOIO_DEBUG'] = '0'
+
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 import cv2
 import numpy as np
-import os
 import tempfile
 import shutil
 from pathlib import Path

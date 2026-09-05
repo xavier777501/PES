@@ -1,12 +1,16 @@
 import sys
 import io
+import os
+
+# IMPORTANT: Force OpenCV en mode headless (pas d'interface graphique)
+os.environ['OPENCV_IO_ENABLE_OPENEXR'] = '0'
+os.environ['OPENCV_VIDEOIO_DEBUG'] = '0'
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 import cv2
 import mediapipe as mp
 import numpy as np
-import os
 from face_utils import (calculate_delaunay_triangles, warp_triangle,
                          get_edge_anchor_points, procrustes_align)
 

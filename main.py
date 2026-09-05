@@ -140,6 +140,18 @@ async def diagnostic():
         except Exception as e:
             diagnostics["system_libs"][lib] = f"ERROR: {str(e)}"
     
+    # Vérifier spécifiquement si le lien symbolique existe
+    try:
+        result = subprocess.run(
+            ["ls", "-la", "/usr/lib/x86_64-linux-gnu/libGLESv2*"],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        diagnostics["libGLESv2_symlink_check"] = result.stdout.strip() if result.stdout else "No symlink found"
+    except Exception as e:
+        diagnostics["libGLESv2_symlink_check"] = f"ERROR: {str(e)}"
+    
     return diagnostics
 
 

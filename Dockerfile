@@ -18,6 +18,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     mesa-utils \
     && rm -rf /var/lib/apt/lists/*
 
+# WORKAROUND: Créer un lien symbolique libGLESv2.so.2 -> libGL.so.1
+# MediaPipe cherche libGLESv2 mais peut fonctionner avec libGL
+RUN ln -s /usr/lib/x86_64-linux-gnu/libGL.so.1 /usr/lib/x86_64-linux-gnu/libGLESv2.so.2
+
 # Créer le dossier de travail
 WORKDIR /app
 
